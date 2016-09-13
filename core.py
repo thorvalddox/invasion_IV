@@ -28,17 +28,20 @@ class Board:
                     self.selected,rel = self.get_tile(*event.pos)
                     rx,ry = rel
                     index = -1
-                    if ry < 10:
+                    if ry < 20:
                         index = 0
-                    elif ry > 90:
+                    elif ry > 80:
                         index = 1
-                    elif rx < 10:
+                    elif rx < 20:
                         index = 2
-                    elif rx > 90:
+                    elif rx > 80:
                         index = 3
                     if index >= 0:
-                        amount = [0,1,0,-1][event.button]
-                        self.selected.move_dir(index,amount)
+                        try:
+                            amount = [0,1,0,-1][event.button]
+                            self.selected.move_dir(index,amount)
+                        except IndexError:
+                            pass
                 elif event.type == pygame.MOUSEBUTTONUP:
                     if self.selected.team == 0:
                         self.target,_ = self.get_tile(*event.pos)
@@ -98,13 +101,14 @@ class Board:
         tt.team = team
         tt.soldiers = 20
         tt.addtileprop(TileProps.village)
+        tt.addtileprop(TileProps.hills)
         for i,j in ((x+1,y),(x-1,y)):
             try:
                 tt = self.tiles[(i, j)]
                 tt.occ = team
                 tt.team = team
                 tt.addtileprop(TileProps.farm)
-                tt.addtileprop(TileProps.hills)
+
             except KeyError:
                 pass
         for i, j in ((x, y + 1), (x, y - 1)):
@@ -113,7 +117,7 @@ class Board:
                 tt.occ = team
                 tt.team = team
                 tt.addtileprop(TileProps.forest)
-                tt.addtileprop(TileProps.hills)
+
             except KeyError:
                 pass
         for i, j in ((x + 1, y + 1), (x + 1, y - 1), (x - 1, y + 1), (x - 1, y - 1)):
@@ -121,7 +125,7 @@ class Board:
                 tt = self.tiles[(i, j)]
                 tt.occ = team
                 tt.team = team
-                tt.addtileprop(TileProps.hills)
+                tt.addtileprop(TileProps.tower)
             except KeyError:
                 pass
 
@@ -149,12 +153,12 @@ def load_tilepop(filename,regen,defence,maxmove,maxsup):
 
 class TileProps:
     forest = load_tilepop("forest.png",0,0,-5,-5)
-    hills = load_tilepop("hills.png",0,2,-5,-5)
-    mountain = load_tilepop("mountain.png",0,2,-15,-10)
+    hills = load_tilepop("hills.png",0,1,-5,-5)
+    mountain = load_tilepop("mountain.png",0,1,-15,-10)
     farm = load_tilepop("farm.png",1,-1,0,+5)
-    village = load_tilepop("settle.png",3,4,0,+15)
-    tower = load_tilepop("tower.png",0,6,-2,+10)
-    castle = load_tilepop("castle.png",5,8,-5,+25)
+    village = load_tilepop("settle.png",3,2,0,+15)
+    tower = load_tilepop("tower.png",0,3,-2,+10)
+    castle = load_tilepop("castle.png",5,4,-5,+25)
 
 
 
