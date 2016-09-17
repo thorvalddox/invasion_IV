@@ -39,20 +39,44 @@ class Board:
                     if index >= 0:
                         try:
                             amount = [0,1,0,-1][event.button]
-                            self.selected.move_dir(index,amount)
+                            self.smartmove(self.selected.border[index],amount)
                         except IndexError:
                             pass
                 elif event.type == pygame.MOUSEBUTTONUP:
-                    if self.selected.team == 0:
-                        self.target,_ = self.get_tile(*event.pos)
-                        self.selected.move(self.target,100)
+                    target,_ = self.get_tile(*event.pos)
+                    self.smartmove(target,100 if event.button == 3 else 1)
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         self.handle_tiles()
+                    movbuttons = (pygame.K_UP,pygame.K_DOWN,pygame.K_LEFT,pygame.K_RIGHT)
+                    if event.key in movbuttons:
+                        target = self.selected.border[movbuttons.index(event.key)]
+                        if target is not None:
+                            if event.mod & pygame.KMOD_SHIFT:
+                                self.smartmove(target,1)
+                            elif event.mod & pygame.KMOD_CTRL:
+                                self.smartmove(target, 100)
+                            else:
+                                self.selected = target
             self.redraw()
+
+    def smartmove(self,target,amount):
+        if target not in self.selected.moveto:
+            return
+        if self.selected.team == 0 and target.team == 0:
+            if target.moveto[self.selected] > 0:
+                target.move(self.selected, -amount)
+            else:
+                self.selected.move(target, amount)
+        elif self.selected.team == 0:
+            self.selected.move(target, amount)
+        elif target.team == 0:
+            target.move(self.selected, -amount)
+
+
     def redraw(self):
         for k,t in self.tiles.items():
-            t.draw(k==self.selected)
+            t.draw(t==self.selected)
 
         pygame.display.flip()
 
@@ -208,8 +232,8 @@ class Tile:
         color = [(127,127,127),(255,0,0),(0,63,255),(0,127,0),(255,192,0)][self.occ+1]
         relx = self.x*100
         rely = self.y*100
-        pygame.draw.rect(self.board.screen, (0,0,0) if selected else color , (relx, rely , 100, 100), 0)
-        pygame.draw.rect(self.board.screen,color,(relx+12,rely+12,76,76),0)
+        pygame.draw.rect(self.board.screen, (0,0,0) if selected else (192,192,192) , (relx, rely , 100, 100), 0)
+        pygame.draw.rect(self.board.screen,color,(relx+4,rely+4,92,92),0)
         if self.occ != self.team:
             color = [(127, 127, 127), (255, 0, 0), (0, 63, 255), (0, 127, 0), (255, 192, 0)][self.team + 1]
         else:
